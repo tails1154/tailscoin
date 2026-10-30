@@ -15,3 +15,6 @@ tailscoind = "tailscoin.node:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+tailscoin = ["index.html"]
+

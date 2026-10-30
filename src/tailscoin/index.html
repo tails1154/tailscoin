@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TailsCoin // Control Room</title>
+  <style>
+    :root { --bg:#11100f; --panel:#1c1917; --line:#3b3129; --text:#f6efe8; --muted:#a79a8e; --hot:#ff9d3f; --green:#8de0a8; --red:#ff7777; }
+    * { box-sizing:border-box; } body { margin:0; background:radial-gradient(circle at 80% 0,#3d2512 0,#11100f 40%); color:var(--text); font:15px system-ui,sans-serif; min-height:100vh; }
+    main { max-width:1050px; margin:auto; padding:32px 20px 60px; } header { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:30px; }
+    h1 { margin:0; font-size:clamp(28px,5vw,52px); letter-spacing:-2px; } h1 span { color:var(--hot); } h2 { margin:0 0 14px; font-size:18px; } p { color:var(--muted); }
+    .tag { border:1px solid var(--line); border-radius:99px; color:var(--green); padding:8px 12px; font-size:12px; white-space:nowrap; }
+    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:14px; } .panel { background:#1c1917dd; border:1px solid var(--line); border-radius:16px; padding:20px; box-shadow:0 12px 35px #0004; }
+    .metric { font-size:31px; font-weight:750; } .label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:1px; margin-bottom:7px; }
+    .wide { grid-column:span 2; } input { width:100%; color:var(--text); background:#100f0e; border:1px solid var(--line); border-radius:9px; padding:12px; margin:6px 0 10px; font:inherit; } input:focus { outline:2px solid #ff9d3f66; border-color:var(--hot); }
+    button { border:0; border-radius:9px; padding:11px 15px; background:var(--hot); color:#241408; font-weight:750; cursor:pointer; } button.secondary { background:#30261f; color:var(--text); border:1px solid var(--line); } button:hover { filter:brightness(1.12); }
+    .row { display:flex; gap:9px; flex-wrap:wrap; } .address { font:12px ui-monospace,monospace; word-break:break-all; color:var(--green); background:#12110f; border-radius:8px; padding:10px; margin:10px 0; }
+    table { border-collapse:collapse; width:100%; font-size:13px; } th,td { text-align:left; padding:10px 6px; border-bottom:1px solid var(--line); } th { color:var(--muted); font-weight:500; } td { font-family:ui-monospace,monospace; } .empty { color:var(--muted); padding:18px 0; }
+    #notice { min-height:22px; color:var(--green); margin:8px 0 0; } #notice.error { color:var(--red); } footer { color:var(--muted); text-align:center; margin-top:26px; font-size:12px; }
+    @media (max-width:720px) { .grid { grid-template-columns:1fr; } .wide { grid-column:auto; } header { align-items:flex-start; flex-direction:column; } }
+  </style>
+</head>
+<body><main>
+  <header><div><div class="label">the internet's most serious dog coin</div><h1>Tails<span>Coin</span> <span>🐕</span></h1><p>Proof-of-work. Big tail energy. Zero financial advice.</p></div><div class="tag">● NODE ONLINE</div></header>
+  <section class="grid">
+    <div class="panel"><div class="label">chain height</div><div class="metric" id="height">—</div></div>
+    <div class="panel"><div class="label">mining reward</div><div class="metric" id="reward">—</div></div>
+    <div class="panel"><div class="label">difficulty</div><div class="metric" id="difficulty">—</div></div>
+    <div class="panel wide"><h2>Your wallet</h2><div id="walletAddress" class="address">No wallet yet. Generate one to begin.</div><div class="row"><button id="newWallet">Generate wallet</button><button class="secondary" id="copyAddress">Copy address</button></div><div class="label" style="margin-top:16px">balance</div><div class="metric"><span id="balance">0</span> TAILS</div><p id="secretNote">Your secret only appears here once. Save it somewhere safe for this demo.</p></div>
+    <div class="panel"><h2>Mine a block</h2><p>Collect the reward to your wallet.</p><button id="mine">⛏ Mine with Proof of Zoomies</button><div id="mineStatus"></div></div>
+    <div class="panel"><h2>Send TAILS</h2><input id="recipient" placeholder="recipient address"><input id="amount" type="number" min="1" placeholder="amount"><button id="send">Send transaction</button></div>
+    <div class="panel wide"><h2>Recent blocks</h2><div id="blocks" class="empty">Loading chain…</div></div>
+  </section><div id="notice"></div><footer>Educational software · single-node demo · do not use for real money</footer>
+</main><script>
+const $ = id => document.getElementById(id); let address = localStorage.getItem('tails_address') || '';
+function note(message, error=false) { $('notice').textContent=message; $('notice').className=error?'error':''; }
+async function api(path, options) { const res=await fetch(path, options); const data=await res.json(); if(!res.ok) throw Error(data.error||'request failed'); return data; }
+async function refresh() { try { const chain=await api('/chain'); $('height').textContent=chain.chain.length-1; $('reward').textContent=chain.reward+' TAILS'; $('difficulty').textContent=chain.difficulty; $('blocks').innerHTML=chain.chain.slice().reverse().map(b=>`<table><tr><th>BLOCK</th><th>HASH</th><th>TRANSACTIONS</th></tr><tr><td>#${b.index}</td><td>${b.hash.slice(0,18)}…</td><td>${b.transactions.length}</td></tr></table>`).join(''); if(address){ const bal=await api('/balance?address='+encodeURIComponent(address)); $('balance').textContent=bal.balance; } } catch(e){ note(e.message,true); } }
+function showWallet(secret) { $('walletAddress').textContent=address; $('secretNote').textContent=secret?'Secret: '+secret+' — save it somewhere safe for this demo.':'Wallet loaded from this browser.'; }
+$('newWallet').onclick=async()=>{ try { const w=await api('/wallet',{method:'POST'}); address=w.address; localStorage.setItem('tails_address',address); showWallet(w.secret); note('Wallet generated. Mine a block to get TAILS.'); await refresh(); } catch(e){note(e.message,true);} };
+$('copyAddress').onclick=()=>address && navigator.clipboard.writeText(address).then(()=>note('Address copied.'));
+$('mine').onclick=async()=>{ if(!address)return note('Generate a wallet first.',true); $('mine').disabled=true; $('mineStatus').textContent='Mining…'; try { await api('/mine',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({miner:address})}); note('Block mined. Much zoomies.'); await refresh(); } catch(e){note(e.message,true);} finally {$('mine').disabled=false;$('mineStatus').textContent='';} };
+$('send').onclick=async()=>{ if(!address)return note('Generate a wallet first.',true); try { await api('/transactions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sender:address,recipient:$('recipient').value,amount:$('amount').value})}); note('Transaction queued. Mine a block to confirm it.'); $('recipient').value=''; $('amount').value=''; } catch(e){note(e.message,true);} };
+if(address)showWallet(); refresh(); setInterval(refresh,5000);
+</script></body></html>

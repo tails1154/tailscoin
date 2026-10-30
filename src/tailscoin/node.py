@@ -1,11 +1,13 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from .core import Blockchain, Transaction, Wallet
 
 CHAIN = Blockchain()
 WALLETS: dict[str, Wallet] = {}
+GUI = (Path(__file__).with_name("index.html")).read_text()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -19,7 +21,14 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
-        if parsed.path == "/chain":
+        if parsed.path in ("/", "/index.html"):
+            data = GUI.encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+        elif parsed.path == "/chain":
             self._send(CHAIN.to_dict())
         elif parsed.path == "/balance":
             address = parse_qs(parsed.query).get("address", [""])[0]
