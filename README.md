@@ -23,6 +23,8 @@ curl -X POST http://127.0.0.1:8333/wallet
 curl http://127.0.0.1:8333/chain
 ```
 
+The node listens on `0.0.0.0:8333`, so other devices can connect using the host machine's LAN IP, such as `http://192.168.1.20:8333`.
+
 The API exposes `POST /wallet`, `POST /transactions`, `POST /mine`, `GET /chain`, and `GET /balance?address=...`.
 
 ## Roadmap

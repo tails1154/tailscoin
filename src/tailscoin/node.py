@@ -61,7 +61,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
-    server = HTTPServer(("127.0.0.1", 8333), Handler)
-    print("TailsCoin node listening on http://127.0.0.1:8333")
+    server = HTTPServer(("0.0.0.0", 8333), Handler)
+    print("TailsCoin node listening on http://0.0.0.0:8333")
     server.serve_forever()
 
