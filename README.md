@@ -18,7 +18,7 @@ Start the node:
 
 ```bash
 tailscoind
-open http://127.0.0.1:8333
+xdg-open http://127.0.0.1:8333
 curl -X POST http://127.0.0.1:8333/wallet
 curl http://127.0.0.1:8333/chain
 ```
