@@ -29,7 +29,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         try:
-            body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
+            raw_body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
+            body = json.loads(raw_body) if raw_body else {}
             if self.path == "/wallet":
                 wallet = Wallet()
                 WALLETS[wallet.address] = wallet
