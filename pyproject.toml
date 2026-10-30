@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tailscoin"
+version = "0.1.0"
+description = "A tiny, honest, meme-powered proof-of-work blockchain."
+requires-python = ">=3.10"
+
+[project.scripts]
+tailscoin = "tailscoin.cli:main"
+tailscoind = "tailscoin.node:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
